@@ -661,28 +661,30 @@ jobs:
           echo "Enabling Droidspaces (portable Linux containers)..."
           DS_DIR="../wildkernels_patches/common/droidspaces"
 
-          # SM8750 uses the 6/7/8 gen kabi fix
           if [ -f "$DS_DIR/fix_sysvipc_kabi_6_7_8.patch" ]; then
             patch -p1 --forward < "$DS_DIR/fix_sysvipc_kabi_6_7_8.patch" || true
           else
-            echo "⚠️ fix_sysvipc_kabi_6_7_8.patch not found, skipping KABI fix"
+            echo "fix_sysvipc_kabi_6_7_8.patch not found, skipping KABI fix"
           fi
 
-          # Fix kernel panic caused by oplus_bsp_midas
           if [ -f "$DS_DIR/0001-Return-ghost-task-if-task-is-null-and-is-requested-b.patch" ]; then
             patch -p1 --forward < "$DS_DIR/0001-Return-ghost-task-if-task-is-null-and-is-requested-b.patch" || true
           fi
 
           cat >> arch/arm64/configs/gki_defconfig << 'EOF'
-          CONFIG_SYSVIPC=y
-          CONFIG_DEVTMPFS=y
+          CONFIG_NAMESPACES=y
+          CONFIG_UTS_NS=y
+          CONFIG_IPC_NS=y
           CONFIG_PID_NS=y
+          CONFIG_NET_NS=y
+          CONFIG_SYSVIPC=y
           CONFIG_POSIX_MQUEUE=y
+          CONFIG_DEVTMPFS=y
           CONFIG_NETFILTER_XT_TARGET_REJECT=y
           CONFIG_NETFILTER_XT_TARGET_LOG=y
           CONFIG_NETFILTER_XT_MATCH_RECENT=y
           EOF
-          echo "✅ Droidspaces support enabled"
+          echo "Droidspaces support enabled"
 
       # ── NEW: IP_SET + IPv6 NAT ───────────────────────────────────────────────
       - name: Add IP_SET + IPv6 NAT Support
